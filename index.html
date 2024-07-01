@@ -1,4 +1,3 @@
-
 <!-- <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -65,7 +64,6 @@
     </script>
 </body>
 </html> -->
-
 
 <!-- <!DOCTYPE html>
 <html lang="fr">
@@ -209,135 +207,172 @@
 </body>
 </html> -->
 
-
-
-
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Détection d'Objets</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <style>
-        input[type="text"] {
-            width: 100%;
-            border: 2px solid #aaa;
-            border-radius: 4px;
-            margin: 8px 0;
-            outline: none;
-            padding: 8px;
-            box-sizing: border-box;
-            transition: 0.3s;
-          }
-          
-          input[type="text"]:focus {
-            border-color: dodgerBlue;
-            box-shadow: 0 0 8px 0 dodgerBlue;
-          }
-          
+      input[type="text"] {
+        width: 100%;
+        border: 2px solid #aaa;
+        border-radius: 4px;
+        margin: 8px 0;
+        outline: none;
+        padding: 8px;
+        box-sizing: border-box;
+        transition: 0.3s;
+      }
+
+      input[type="text"]:focus {
+        border-color: dodgerBlue;
+        box-shadow: 0 0 8px 0 dodgerBlue;
+      } /* CSS */
+      .button-33 {
+        background-color: #c2fbd7;
+        border-radius: 100px;
+        box-shadow: rgba(44, 187, 99, 0.2) 0 -25px 18px -14px inset,
+          rgba(44, 187, 99, 0.15) 0 1px 2px, rgba(44, 187, 99, 0.15) 0 2px 4px,
+          rgba(44, 187, 99, 0.15) 0 4px 8px, rgba(44, 187, 99, 0.15) 0 8px 16px,
+          rgba(44, 187, 99, 0.15) 0 16px 32px;
+        color: green;
+        cursor: pointer;
+        display: inline-block;
+        font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto,
+          sans-serif;
+        padding: 7px 20px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 250ms;
+        border: 0;
+        font-size: 16px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+      }
+
+      .button-33:hover {
+        box-shadow: rgba(44, 187, 99, 0.35) 0 -25px 18px -14px inset,
+          rgba(44, 187, 99, 0.25) 0 1px 2px, rgba(44, 187, 99, 0.25) 0 2px 4px,
+          rgba(44, 187, 99, 0.25) 0 4px 8px, rgba(44, 187, 99, 0.25) 0 8px 16px,
+          rgba(44, 187, 99, 0.25) 0 16px 32px;
+        transform: scale(1.05) rotate(-1deg);
+      }
     </style>
-</head>
-<body>
-   
-    <input type="text"  id="imageUrl"  placeholder="Entrez l'URL de l'image">
-    <button id="loadImage">Charger l'image</button>
+  </head>
+  <body>
+    <input type="text" id="imageUrl" placeholder="Entrez l'URL de l'image" />
+    <!-- <button id="loadImage">Charger l'image</button> -->
+    <!-- HTML !-->
+   <center> <button id="loadImage" class="button-33" role="button">
+      Charger l'image
+    </button></center>
+
     <canvas id="canvas"></canvas>
     <script>
-        let firstImageJson = null;
-        let secondImageJson = null;
-        let attemptCount = 0;
-        let model = null;
+      let firstImageJson = null;
+      let secondImageJson = null;
+      let attemptCount = 0;
+      let model = null;
 
-        async function loadModel() {
-            if (!model) {
-                model = await cocoSsd.load();
-            }
+      async function loadModel() {
+        if (!model) {
+          model = await cocoSsd.load();
         }
+      }
 
-        document.getElementById('loadImage').addEventListener('click', async () => {
-            const url = document.getElementById('imageUrl').value;
-            if (!url) return;
+      document
+        .getElementById("loadImage")
+        .addEventListener("click", async () => {
+          const url = document.getElementById("imageUrl").value;
+          if (!url) return;
 
-            const img = new Image();
-            img.crossOrigin = 'anonymous'; // Ajoute cette ligne pour permettre le chargement des images d'autres domaines
-            img.src = url;
+          const img = new Image();
+          img.crossOrigin = "anonymous"; // Ajoute cette ligne pour permettre le chargement des images d'autres domaines
+          img.src = url;
 
-            img.onload = async () => {
-                await loadModel();
-                const canvas = document.getElementById('canvas');
-                const ctx = canvas.getContext('2d');
+          img.onload = async () => {
+            await loadModel();
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
 
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0, img.width, img.height);
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
 
-                const predictions = await model.detect(img);
+            const predictions = await model.detect(img);
 
-                predictions.forEach(prediction => {
-                    ctx.beginPath();
-                    ctx.rect(...prediction.bbox);
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = 'red';
-                    ctx.fillStyle = 'red';
-                    ctx.stroke();
-                    ctx.fillText(prediction.class, prediction.bbox[0], prediction.bbox[1] > 10 ? prediction.bbox[1] - 5 : 10);
-                });
+            predictions.forEach((prediction) => {
+              ctx.beginPath();
+              ctx.rect(...prediction.bbox);
+              ctx.lineWidth = 2;
+              ctx.strokeStyle = "red";
+              ctx.fillStyle = "red";
+              ctx.stroke();
+              ctx.fillText(
+                prediction.class,
+                prediction.bbox[0],
+                prediction.bbox[1] > 10 ? prediction.bbox[1] - 5 : 10
+              );
+            });
 
-                const result = predictions.map(pred => ({
-                    class: pred.class,
-                }));
+            const result = predictions.map((pred) => ({
+              class: pred.class,
+            }));
 
-                if (attemptCount === 0) {
-                    firstImageJson = result;
-                    attemptCount++;
-                    alert("Première image détectée et sauvegardée. Vous pouvez maintenant entrer une autre URL pour la comparaison.");
-                } else if (attemptCount === 1) {
-                    secondImageJson = result;
-                    attemptCount++;
+            if (attemptCount === 0) {
+              firstImageJson = result;
+              attemptCount++;
+              alert(
+                "Première image détectée et sauvegardée. Vous pouvez maintenant entrer une autre URL pour la comparaison."
+              );
+            } else if (attemptCount === 1) {
+              secondImageJson = result;
+              attemptCount++;
 
-                    compareAndReturnDifferentClasses(firstImageJson, secondImageJson);
-                } else {
-                    attemptCount = 0; // Réinitialisation si plus de deux images sont téléchargées
-                }
-            };
+              compareAndReturnDifferentClasses(firstImageJson, secondImageJson);
+            } else {
+              attemptCount = 0; // Réinitialisation si plus de deux images sont téléchargées
+            }
+          };
 
-            img.onerror = () => {
-                alert('Erreur lors du chargement de l\'image. Veuillez vérifier l\'URL et réessayer.');
-            };
+          img.onerror = () => {
+            alert(
+              "Erreur lors du chargement de l'image. Veuillez vérifier l'URL et réessayer."
+            );
+          };
         });
 
-        function compareAndReturnDifferentClasses(firstJson, secondJson) {
-            const firstClasses = new Set(firstJson.map(item => item.class));
-            const secondClasses = new Set(secondJson.map(item => item.class));
-            const differentClasses = [...firstClasses].filter(classname => !secondClasses.has(classname));
+      function compareAndReturnDifferentClasses(firstJson, secondJson) {
+        const firstClasses = new Set(firstJson.map((item) => item.class));
+        const secondClasses = new Set(secondJson.map((item) => item.class));
+        const differentClasses = [...firstClasses].filter(
+          (classname) => !secondClasses.has(classname)
+        );
 
-            const result = {
-                different_classes: differentClasses
-            };
+        const result = {
+          different_classes: differentClasses,
+        };
 
-            downloadJSON(result);
-        }
+        downloadJSON(result);
+      }
 
-        function downloadJSON(data) {
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'result.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+      function downloadJSON(data) {
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "result.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
     </script>
-</body>
+  </body>
 </html>
-
-
-
-
-
 
 <!-- <!DOCTYPE html>
 <html lang="fr">
