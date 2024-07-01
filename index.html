@@ -83,6 +83,13 @@
         let firstImageJson = null;
         let secondImageJson = null;
         let attemptCount = 0;
+        let model = null;
+
+        async function loadModel() {
+            if (!model) {
+                model = await cocoSsd.load();
+            }
+        }
 
         document.getElementById('imageUpload').addEventListener('change', async (event) => {
             const file = event.target.files[0];
@@ -92,7 +99,7 @@
             img.src = URL.createObjectURL(file);
 
             img.onload = async () => {
-                const model = await cocoSsd.load();
+                await loadModel();
                 const canvas = document.getElementById('canvas');
                 const ctx = canvas.getContext('2d');
 
@@ -156,3 +163,123 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détection d'Objets Améliorée</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+</head>
+<body>
+    <input type="file" id="imageUpload" accept="image/*">
+    <canvas id="canvas"></canvas>
+    <div id="status"></div>
+    <script>
+        let firstImageJson = null;
+        let secondImageJson = null;
+        let attemptCount = 0;
+        let model = null;
+
+        // Charger le modèle immédiatement au chargement de la page
+        loadModel();
+
+        async function loadModel() {
+            if (!model) {
+                updateStatus("Chargement du modèle...");
+                model = await cocoSsd.load();
+                updateStatus("Modèle chargé. Prêt pour la détection.");
+            }
+        }
+
+        document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            updateStatus("Traitement de l'image...");
+
+            const img = await createImageBitmap(file);
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            if (!model) await loadModel();
+
+            const predictions = await model.detect(canvas);
+
+            drawPredictions(ctx, predictions);
+            processResults(predictions);
+        }
+
+        function drawPredictions(ctx, predictions) {
+            predictions.forEach(prediction => {
+                const [x, y, width, height] = prediction.bbox;
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, width, height);
+                ctx.fillStyle = 'red';
+                ctx.font = '16px Arial';
+                ctx.fillText(`${prediction.class} (${Math.round(prediction.score * 100)}%)`, x, y > 10 ? y - 5 : 10);
+            });
+        }
+
+        function processResults(predictions) {
+            const result = predictions.map(pred => ({
+                class: pred.class,
+                score: pred.score
+            }));
+
+            if (attemptCount === 0) {
+                firstImageJson = result;
+                attemptCount++;
+                updateStatus("Première image détectée et sauvegardée. Vous pouvez maintenant télécharger une autre image pour la comparaison.");
+            } else if (attemptCount === 1) {
+                secondImageJson = result;
+                attemptCount = 0;
+                compareAndReturnDifferentClasses(firstImageJson, secondImageJson);
+            }
+        }
+
+        function compareAndReturnDifferentClasses(firstJson, secondJson) {
+            const firstClasses = new Set(firstJson.map(item => item.class));
+            const secondClasses = new Set(secondJson.map(item => item.class));
+            const differentClasses = [...firstClasses].filter(classname => !secondClasses.has(classname));
+
+            const result = {
+                different_classes: differentClasses,
+                first_image_classes: Array.from(firstClasses),
+                second_image_classes: Array.from(secondClasses)
+            };
+
+            downloadJSON(result);
+            updateStatus("Comparaison terminée. Téléchargement du fichier JSON...");
+        }
+
+        function downloadJSON(data) {
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'detection_results.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+    </script>
+</body>
+</html> -->
